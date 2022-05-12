@@ -1,13 +1,5 @@
 #! /bin/bash
 
-# TODO:
-#   - check that magisk is indeed installed
-#   - check that magisk is indeed not activated
-#   - create unit tests
-#   - check that all the commands are installed
-#   - show titles of each step to understand better the output
-#   - write the README
-
 set -e
 
 PHONE_ADB_SERIAL_NUMBER=810972cf
