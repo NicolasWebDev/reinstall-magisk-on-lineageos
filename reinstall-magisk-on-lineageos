@@ -1,0 +1,103 @@
+#! /bin/bash
+
+# TODO:
+#   - check that magisk is indeed installed
+#   - check that magisk is indeed not activated
+#   - create unit tests
+#   - check that all the commands are installed
+#   - show titles of each step to understand better the output
+#   - write the README
+
+set -e
+
+PHONE_ADB_SERIAL_NUMBER=810972cf
+PHONE_ANDROID_NAME=vayu
+
+check_phone_is_connected() {
+    if ! adb devices | grep --silent "$PHONE_ADB_SERIAL_NUMBER"; then
+        echo "ERROR: phone is not connected"
+        exit 1
+    fi
+}
+
+check_phone_is_in_fastboot_mode() {
+    fastboot devices | grep --silent "$PHONE_ADB_SERIAL_NUMBER"
+}
+
+get_url_of_latest_build() {
+    curl --no-progress-meter https://download.lineageos.org/$PHONE_ANDROID_NAME |
+        grep --perl-regexp --only-matching "https://mirrorbits.lineageos.org/full/$PHONE_ANDROID_NAME/[0-9]*/lineage-.*.zip(?=\")" |
+        head -1
+}
+
+download_latest_lineageos_build() {
+    # The --location lets curl follow the redirection.
+    curl --location "$(get_url_of_latest_build)" --output /tmp/lineageos-last-build.zip
+}
+
+extract_boot_image() {
+    unzip -od /tmp /tmp/lineageos-last-build.zip boot.img
+}
+
+transfer_unpatched_boot_image_to_phone() {
+    adb -s "$PHONE_ADB_SERIAL_NUMBER" push /tmp/boot.img /sdcard/Download/boot.img
+}
+
+patch_boot_image_on_phone() {
+    adb -s "$PHONE_ADB_SERIAL_NUMBER" shell /data/adb/magisk/boot_patch.sh /sdcard/Download/boot.img
+    adb -s "$PHONE_ADB_SERIAL_NUMBER" shell mv /data/adb/magisk/new-boot.img /sdcard/Download/patched-boot.img
+}
+
+transfer_patched_boot_image_to_pc() {
+    adb -s "$PHONE_ADB_SERIAL_NUMBER" pull /sdcard/Download/patched-boot.img /tmp
+}
+
+reboot_to_bootloader() {
+    adb -s "$PHONE_ADB_SERIAL_NUMBER" reboot bootloader
+}
+
+wait_for_phone_to_be_in_fastboot() {
+    SECONDS=0
+    until check_phone_is_in_fastboot_mode; do
+
+        if ((SECONDS > 60)); then
+            echo "Giving up..."
+            exit 2
+        fi
+
+        echo "Phone is not in fastboot mode yet. Waiting..."
+        sleep 5
+    done
+}
+
+flash_patched_boot_image() {
+    fastboot -s "$PHONE_ADB_SERIAL_NUMBER" flash boot /tmp/patched-boot.img
+}
+
+reboot_phone() {
+    fastboot -s "$PHONE_ADB_SERIAL_NUMBER" reboot
+}
+
+enable_adb_root_access() {
+    adb -s "$PHONE_ADB_SERIAL_NUMBER" root &&
+        adb -s "$PHONE_ADB_SERIAL_NUMBER" shell ls / # Check that the phone allows root debugging.
+}
+
+main() {
+    check_phone_is_connected
+    enable_adb_root_access
+    download_latest_lineageos_build
+    extract_boot_image
+    transfer_unpatched_boot_image_to_phone
+    patch_boot_image_on_phone
+    transfer_patched_boot_image_to_pc
+    reboot_to_bootloader
+    wait_for_phone_to_be_in_fastboot
+    flash_patched_boot_image
+    reboot_phone
+}
+
+# Run the main only when this file is executed as script, to help with testing.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
