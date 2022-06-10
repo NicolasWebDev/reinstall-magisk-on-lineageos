@@ -16,6 +16,16 @@ test_get_build_url_vayu() { #@test
     assert_output https://mirrorbits.lineageos.org/full/vayu/20220527/lineage-18.1-20220527-nightly-vayu-signed.zip
 }
 
+test_get_device_downloads_page() { #@test
+    load ../reinstall-magisk-on-lineageos
+    function get_device_name() { echo vayu; }
+    export -f get_device_name
+
+    run get_device_downloads_page
+
+    assert_output https://download.lineageos.org/vayu
+}
+
 test_get_build_url_alioth() { #@test
     load ../reinstall-magisk-on-lineageos
     function get_lineage_version() { echo 19.1-20220604-NIGHTLY-alioth; }
