@@ -16,10 +16,14 @@ check_phone_is_in_fastboot_mode() {
     fastboot devices | grep --silent "$PHONE_ADB_SERIAL_NUMBER"
 }
 
+get_lineage_version() {
+    adb -s "$PHONE_ADB_SERIAL_NUMBER" shell getprop ro.lineage.version | tr -d '\n'
+}
+
 get_build_url() {
     curl --no-progress-meter https://download.lineageos.org/$PHONE_ANDROID_NAME |
-        grep --perl-regexp --only-matching "https://mirrorbits.lineageos.org/full/$PHONE_ANDROID_NAME/[0-9]*/lineage-.*.zip(?=\")" |
-        head -1
+        grep --perl-regexp --only-matching --ignore-case \
+            "(?<=href=\")https://mirrorbits.lineageos.org/.*?$(get_lineage_version)-signed.zip(?=\")"
 }
 
 download_latest_lineageos_build() {

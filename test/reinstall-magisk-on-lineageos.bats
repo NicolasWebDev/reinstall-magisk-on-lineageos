@@ -6,17 +6,20 @@ setup() {
 
 test_get_build_url_vayu() { #@test
     load ../reinstall-magisk-on-lineageos
+    function get_lineage_version() { echo 18.1-20220527-NIGHTLY-vayu; }
+    export -f get_lineage_version
     function curl() { cat "$DIR/builds_download_page_vayu.fixture.html"; }
     export -f curl
 
     run get_build_url
 
-    assert_output https://mirrorbits.lineageos.org/full/vayu/20220603/lineage-18.1-20220603-nightly-vayu-signed.zip
+    assert_output https://mirrorbits.lineageos.org/full/vayu/20220527/lineage-18.1-20220527-nightly-vayu-signed.zip
 }
 
 test_get_build_url_alioth() { #@test
     load ../reinstall-magisk-on-lineageos
-    export PHONE_ANDROID_NAME=alioth
+    function get_lineage_version() { echo 19.1-20220604-NIGHTLY-alioth; }
+    export -f get_lineage_version
     function curl() { cat "$DIR/builds_download_page_alioth.fixture.html"; }
     export -f curl
 
