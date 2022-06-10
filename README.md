@@ -6,6 +6,8 @@ Before I had to patch once more the boot using the Magisk app doing all the step
 
 So now I can update my LineageOS phone every week without any hassle.
 
+My solution is based on the official [installation guide of Magisk](https://topjohnwu.github.io/Magisk/install.html).
+
 ## Warning
 
 This script is written in bash, so as any bash script it is run with the same permissions than your current user.
