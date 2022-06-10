@@ -16,7 +16,7 @@ check_phone_is_in_fastboot_mode() {
     fastboot devices | grep --silent "$PHONE_ADB_SERIAL_NUMBER"
 }
 
-get_url_of_latest_build() {
+get_build_url() {
     curl --no-progress-meter https://download.lineageos.org/$PHONE_ANDROID_NAME |
         grep --perl-regexp --only-matching "https://mirrorbits.lineageos.org/full/$PHONE_ANDROID_NAME/[0-9]*/lineage-.*.zip(?=\")" |
         head -1
@@ -24,7 +24,7 @@ get_url_of_latest_build() {
 
 download_latest_lineageos_build() {
     # The --location lets curl follow the redirection.
-    curl --location "$(get_url_of_latest_build)" --output /tmp/lineageos-last-build.zip
+    curl --location "$(get_build_url)" --output /tmp/lineageos-last-build.zip
 }
 
 extract_boot_image() {
