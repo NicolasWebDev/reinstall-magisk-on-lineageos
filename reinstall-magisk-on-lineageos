@@ -43,9 +43,29 @@ extract_boot_image_from_file_based_ota() {
     exit 1
 }
 
+install_python_protobuf() {
+    sudo python3 -m pip install protobuf
+}
+
+extract_payload_from_payload_based_ota() {
+    unzip -od /tmp /tmp/lineageos-last-build.zip payload.bin
+}
+
+generate_random_alnum_string_of_length_6() {
+    tr -dc A-Za-z0-9 </dev/urandom | head -c 6
+}
+
+extract_boot_image_from_payload_file() {
+    install_python_protobuf
+    # For cases in which the repo has already been cloned, I prefer to create a random directory name to clone into, instead of deleting any file or directory on the user's machine.
+    scripts_directory_name="scripts_$(generate_random_alnum_string_of_length_6)"
+    git clone https://github.com/LineageOS/scripts /tmp/$scripts_directory_name
+    python /tmp/$scripts_directory_name/update-payload-extractor/extract.py --partitions boot --output_dir /tmp/ /tmp/payload.bin
+}
+
 extract_boot_image_from_payload_based_ota() {
-    echo 'ERROR: the function "extract_boot_image_from_payload_based_ota" is not implemented'
-    exit 1
+    extract_payload_from_payload_based_ota
+    extract_boot_image_from_payload_file
 }
 
 is_ota_payload_based() {
