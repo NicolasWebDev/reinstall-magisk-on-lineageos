@@ -28,15 +28,15 @@ If on Windows, you can use the [Windows Subsystem for Linux](https://en.wikipedi
 
 ## Usage
 
-1. Download the latest LineageOS update on your phone.
-2. Install the LineageOS update on your phone. The device should reboot automatically. After this step Magisk is no more installed on your phone.
+1. Download an update of LineageOS on your phone.
+2. Install the update on your phone. The device should reboot automatically. After this step Magisk is no more installed on your phone.
 4. Connect your phone to your computer.
 5. Run `bash reinstall-magisk-on-lineageos` in the root of this project.
 
 ## How it works
 
 The script should be pretty readable and self-explanatory, without any bash knowledge.
-To sum it up, it downloads the latest LineageOS build on your pc, extracts the `boot` image from the archive, transfers it on your phone, uses the Magisk app installed on your phone to patch the `boot` image, reboots the phone in fastboot mode, then flashes the patched boot image and restarts the device.
+To sum it up, it downloads the right LineageOS build on your pc (the same one that you have just installed), extracts the `boot.img` image from the archive, transfers it on your phone, uses the Magisk app installed on your phone to patch the `boot.img` image, reboots the phone in fastboot mode, then flashes the patched boot image and restarts the device.
 
 ## Different methods of extracting the `boot.img` file
 

@@ -3,7 +3,6 @@
 set -e
 
 PHONE_ADB_SERIAL_NUMBER=810972cf
-PHONE_ANDROID_NAME=vayu
 
 check_phone_is_connected() {
     if ! adb devices | grep --silent "$PHONE_ADB_SERIAL_NUMBER"; then
@@ -16,15 +15,27 @@ check_phone_is_in_fastboot_mode() {
     fastboot devices | grep --silent "$PHONE_ADB_SERIAL_NUMBER"
 }
 
-get_url_of_latest_build() {
-    curl --no-progress-meter https://download.lineageos.org/$PHONE_ANDROID_NAME |
-        grep --perl-regexp --only-matching "https://mirrorbits.lineageos.org/full/$PHONE_ANDROID_NAME/[0-9]*/lineage-.*.zip(?=\")" |
-        head -1
+get_lineage_version() {
+    adb -s "$PHONE_ADB_SERIAL_NUMBER" shell getprop ro.lineage.version | tr -d '\n'
+}
+
+get_device_name() {
+    adb -s "$PHONE_ADB_SERIAL_NUMBER" shell getprop ro.lineage.device | tr -d '\n'
+}
+
+get_device_downloads_page() {
+    echo "https://download.lineageos.org/$(get_device_name)"
+}
+
+get_build_url() {
+    curl --no-progress-meter "$(get_device_downloads_page)" |
+        grep --perl-regexp --only-matching --ignore-case \
+            "(?<=href=\")https://mirrorbits.lineageos.org/.*?$(get_lineage_version)-signed.zip(?=\")"
 }
 
 download_latest_lineageos_build() {
     # The --location lets curl follow the redirection.
-    curl --location "$(get_url_of_latest_build)" --output /tmp/lineageos-last-build.zip
+    curl --location "$(get_build_url)" --output /tmp/lineageos.zip
 }
 
 extract_boot_image() {
@@ -48,7 +59,7 @@ install_python_protobuf() {
 }
 
 extract_payload_from_payload_based_ota() {
-    unzip -od /tmp /tmp/lineageos-last-build.zip payload.bin
+    unzip -od /tmp /tmp/lineageos.zip payload.bin
 }
 
 generate_random_alnum_string_of_length_6() {
@@ -69,15 +80,15 @@ extract_boot_image_from_payload_based_ota() {
 }
 
 is_ota_payload_based() {
-    unzip -l /tmp/lineageos-last-build.zip | grep -wq payload.bin
+    unzip -l /tmp/lineageos.zip | grep -wq payload.bin
 }
 
 is_ota_block_based() {
-    unzip -l /tmp/lineageos-last-build.zip | grep -wq boot.img
+    unzip -l /tmp/lineageos.zip | grep -wq boot.img
 }
 
 extract_boot_image_from_block_based_ota() {
-    unzip -od /tmp /tmp/lineageos-last-build.zip boot.img
+    unzip -od /tmp /tmp/lineageos.zip boot.img
 }
 
 transfer_unpatched_boot_image_to_phone() {
