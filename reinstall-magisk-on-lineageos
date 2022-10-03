@@ -2,13 +2,20 @@
 
 set -e
 
-PHONE_ADB_SERIAL_NUMBER=810972cf
+PHONE_ADB_SERIAL_NUMBER=placeholder
+
+print_message() {
+    printf "$1\n"
+}
 
 check_phone_is_connected() {
     if ! adb devices | grep --silent "$PHONE_ADB_SERIAL_NUMBER"; then
-        echo "ERROR: phone is not connected"
+        print_message "ERROR: phone '$PHONE_ADB_SERIAL_NUMBER' is not connected"
+        adb devices -l
         exit 1
     fi
+    print_message "Operations will be performed on:"
+    adb devices -l | grep $PHONE_ADB_SERIAL_NUMBER
 }
 
 check_phone_is_in_fastboot_mode() {
@@ -81,22 +88,37 @@ reboot_phone() {
     fastboot -s "$PHONE_ADB_SERIAL_NUMBER" reboot
 }
 
-enable_adb_root_access() {
-    adb -s "$PHONE_ADB_SERIAL_NUMBER" root &&
-        adb -s "$PHONE_ADB_SERIAL_NUMBER" shell ls / # Check that the phone allows root debugging.
+check_magisk_folder() {
+    adb -s "$PHONE_ADB_SERIAL_NUMBER" shell ls /data/adb/magisk/
+}
+
+is_rooted_debugging_enabled() {
+    adb -s "$PHONE_ADB_SERIAL_NUMBER" root
 }
 
 main() {
+    print_message "Looking for phone '$PHONE_ADB_SERIAL_NUMBER'"
     check_phone_is_connected
-    enable_adb_root_access
+    print_message "Checking on phone if rooted debugging is enabled"
+    is_rooted_debugging_enabled
+    print_message "Checking on phone if Magisk folder is present listing /data/adb/magisk/"
+    check_magisk_folder
+    print_message "Downloading build archive from $(get_build_url)"
     download_latest_lineageos_build
+    print_message "Extracting 'boot.img' from build archive in /tmp/boot.img"
     extract_boot_image
+    print_message "Copying from PC to phone the boot image in /sdcard/Download/boot.img"
     transfer_unpatched_boot_image_to_phone
+    print_message "Patching boot image with Magisk script and moving it in /sdcard/Download/patched-boot.img"
     patch_boot_image_on_phone
+    print_message "Copying patched boot image from phone to PC in /tmp/patched-boot.img"
     transfer_patched_boot_image_to_pc
+    print_message "Rebooting phone in fastboot mode"
     reboot_to_bootloader
     wait_for_phone_to_be_in_fastboot
+    print_message "Flashing patched boot image on phone"
     flash_patched_boot_image
+    print_message "Rebooting phone"
     reboot_phone
 }
 
