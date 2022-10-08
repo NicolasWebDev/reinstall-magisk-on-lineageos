@@ -39,6 +39,55 @@ download_latest_lineageos_build() {
 }
 
 extract_boot_image() {
+    # See https://wiki.lineageos.org/extracting_blobs_from_zips to understand the different ways to extract the boot.img file.
+    if is_ota_block_based; then
+        extract_boot_image_from_block_based_ota
+    elif is_ota_payload_based; then
+        extract_boot_image_from_payload_based_ota
+    else
+        extract_boot_image_from_file_based_ota
+    fi
+}
+
+extract_boot_image_from_file_based_ota() {
+    echo 'ERROR: the function "extract_boot_image_from_file_based_ota" is not implemented'
+    exit 1
+}
+
+install_python_protobuf() {
+    sudo python3 -m pip install protobuf
+}
+
+extract_payload_from_payload_based_ota() {
+    unzip -od /tmp /tmp/lineageos.zip payload.bin
+}
+
+generate_random_alnum_string_of_length_6() {
+    tr -dc A-Za-z0-9 </dev/urandom | head -c 6
+}
+
+extract_boot_image_from_payload_file() {
+    install_python_protobuf
+    # For cases in which the repo has already been cloned, I prefer to create a random directory name to clone into, instead of deleting any file or directory on the user's machine.
+    scripts_directory_name="scripts_$(generate_random_alnum_string_of_length_6)"
+    git clone https://github.com/LineageOS/scripts /tmp/$scripts_directory_name
+    python /tmp/$scripts_directory_name/update-payload-extractor/extract.py --partitions boot --output_dir /tmp/ /tmp/payload.bin
+}
+
+extract_boot_image_from_payload_based_ota() {
+    extract_payload_from_payload_based_ota
+    extract_boot_image_from_payload_file
+}
+
+is_ota_payload_based() {
+    unzip -l /tmp/lineageos.zip | grep -wq payload.bin
+}
+
+is_ota_block_based() {
+    unzip -l /tmp/lineageos.zip | grep -wq boot.img
+}
+
+extract_boot_image_from_block_based_ota() {
     unzip -od /tmp /tmp/lineageos.zip boot.img
 }
 
