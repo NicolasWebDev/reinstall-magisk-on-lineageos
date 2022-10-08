@@ -1,3 +1,5 @@
+#! /bin/bash
+
 setup() {
     load 'test_helper/bats-support/load'
     load 'test_helper/bats-assert/load'
@@ -8,6 +10,8 @@ test_get_build_url_vayu() { #@test
     load ../reinstall-magisk-on-lineageos
     function get_lineage_version() { echo 18.1-20220527-NIGHTLY-vayu; }
     export -f get_lineage_version
+    function get_device_name() { echo vayu; }
+    export -f get_device_name
     function curl() { cat "$DIR/builds_download_page_vayu.fixture.html"; }
     export -f curl
 
@@ -30,6 +34,8 @@ test_get_build_url_alioth() { #@test
     load ../reinstall-magisk-on-lineageos
     function get_lineage_version() { echo 19.1-20220604-NIGHTLY-alioth; }
     export -f get_lineage_version
+    function get_device_name() { echo alioth; }
+    export -f get_device_name
     function curl() { cat "$DIR/builds_download_page_alioth.fixture.html"; }
     export -f curl
 
