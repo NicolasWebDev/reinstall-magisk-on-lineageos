@@ -29,8 +29,10 @@ get_device_downloads_page() {
 
 get_build_url() {
     curl --no-progress-meter "$(get_device_downloads_page)" |
-        grep --perl-regexp --only-matching --ignore-case \
-            "(?<=href=\")https://mirrorbits.lineageos.org/.*?$(get_lineage_version)-signed.zip(?=\")"
+        grep --only-matching --ignore-case \
+            "https://mirrorbits.lineageos.org/[^\"]*"$(
+            )"$(get_lineage_version)-signed.zip" |
+        head -1
 }
 
 download_latest_lineageos_build() {
