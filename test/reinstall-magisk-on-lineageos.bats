@@ -43,3 +43,11 @@ test_get_build_url_alioth() { #@test
 
     assert_output https://mirrorbits.lineageos.org/full/alioth/20220604/lineage-19.1-20220604-nightly-alioth-signed.zip
 }
+
+test_generate_random_alnum_string_of_length_6() { #@test
+    load ../reinstall-magisk-on-lineageos
+
+    run generate_random_alnum_string_of_length_6
+
+    assert_output --regexp '^[0-9a-zA-Z]{6}$'
+}
