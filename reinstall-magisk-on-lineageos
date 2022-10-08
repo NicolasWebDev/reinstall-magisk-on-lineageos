@@ -2,7 +2,7 @@
 
 set -e
 
-PHONE_ADB_SERIAL_NUMBER=placeholder
+PHONE_ADB_SERIAL_NUMBER=paste_yours_here # The adb serial number can be found by running `adb devices`.
 
 print_message() {
     printf "$1\n"
