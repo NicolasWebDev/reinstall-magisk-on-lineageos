@@ -64,7 +64,7 @@ extract_boot_image_from_file_based_ota() {
 }
 
 install_python_protobuf() {
-    sudo python3 -m pip install protobuf
+    pip3 install protobuf
 }
 
 extract_payload_from_payload_based_ota() {
@@ -80,7 +80,7 @@ extract_boot_image_from_payload_file() {
     # For cases in which the repo has already been cloned, I prefer to create a random directory name to clone into, instead of deleting any file or directory on the user's machine.
     scripts_directory_name="scripts_$(generate_random_alnum_string_of_length_6)"
     git clone https://github.com/LineageOS/scripts /tmp/$scripts_directory_name
-    python /tmp/$scripts_directory_name/update-payload-extractor/extract.py --partitions boot --output_dir /tmp/ /tmp/payload.bin
+    python3 /tmp/$scripts_directory_name/update-payload-extractor/extract.py --partitions boot --output_dir /tmp/ /tmp/payload.bin
 }
 
 extract_boot_image_from_payload_based_ota() {
