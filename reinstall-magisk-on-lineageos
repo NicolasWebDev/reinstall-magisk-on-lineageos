@@ -59,7 +59,7 @@ extract_boot_image() {
 }
 
 extract_boot_image_from_file_based_ota() {
-    echo 'ERROR: the function "extract_boot_image_from_file_based_ota" is not implemented'
+    print_message ' ERROR: the function "extract_boot_image_from_file_based_ota" is not implemented'
     exit 1
 }
 
@@ -122,11 +122,11 @@ wait_for_phone_to_be_in_fastboot() {
     until check_phone_is_in_fastboot_mode; do
 
         if ((SECONDS > 60)); then
-            echo "Giving up..."
+            print_message " Giving up and exiting."
             exit 2
         fi
 
-        echo "Phone is not in fastboot mode yet. Waiting..."
+        print_message " Phone is not in fastboot mode yet. Waiting..."
         sleep 5
     done
 }
