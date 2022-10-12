@@ -2,10 +2,18 @@
 
 set -e
 
+REQUIRED_TOOLS_ARRAY="adb fastboot pip3 python3"
+
 PHONE_ADB_SERIAL_NUMBER=paste_yours_here # The adb serial number can be found by running `adb devices`.
 
 print_message() {
     printf "$1\n"
+}
+
+check_required_tools() {
+    type $REQUIRED_TOOLS_ARRAY &&
+         print_message "All tools are installed!"  || 
+         { print_message "A required tool but is not installed. Exiting."; exit 1; } 
 }
 
 check_phone_is_connected() {
@@ -162,6 +170,8 @@ is_rooted_debugging_enabled() {
 }
 
 main() {
+    print_message "Checking all required tools"
+    check_required_tools
     print_message "Looking for phone '$PHONE_ADB_SERIAL_NUMBER'"
     check_phone_is_connected
     print_message "Checking on phone if rooted debugging is enabled"
