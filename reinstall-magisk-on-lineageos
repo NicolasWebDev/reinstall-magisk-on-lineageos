@@ -34,12 +34,32 @@ get_device_downloads_page() {
     echo "https://download.lineageos.org/$(get_device_name)"
 }
 
+get_microg_device_downloads_page() {
+    echo "https://download.lineage.microg.org/$(get_device_name)/"
+}
+
 get_build_url() {
+	if [[ $(get_lineage_version) =~ "microG" ]]
+	then
+		echo $(get_microg_build_url)
+	else
+		echo $(get_vanilla_build_url)
+	fi
+	}
+
+get_vanilla_build_url() {
     curl --no-progress-meter "$(get_device_downloads_page)" |
         grep --only-matching --ignore-case \
             "https://mirrorbits.lineageos.org/[^\"]*"$(
             )"$(get_lineage_version)-signed.zip" |
         head -1
+}
+
+get_microg_build_url() {
+	echo $(get_microg_device_downloads_page)$(curl --no-progress-meter "$(get_microg_device_downloads_page)" |
+        grep --only-matching --ignore-case \
+           "lineage-$(get_lineage_version).zip" |
+	   head -1)
 }
 
 download_latest_lineageos_build() {
