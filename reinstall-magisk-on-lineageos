@@ -31,15 +31,11 @@ get_device_name() {
 }
 
 get_device_downloads_page() {
-    echo "https://download.lineageos.org/$(get_device_name)"
+    echo "https://download.lineageos.org/api/v2/devices/$(get_device_name)/builds"
 }
 
 get_build_url() {
-    curl --no-progress-meter "$(get_device_downloads_page)" |
-        grep --only-matching --ignore-case \
-            "https://mirrorbits.lineageos.org/[^\"]*"$(
-            )"$(get_lineage_version)-signed.zip" |
-        head -1
+    curl --no-progress-meter "$(get_device_downloads_page)" | jq -r '.[0].files[0].url'
 }
 
 download_latest_lineageos_build() {
