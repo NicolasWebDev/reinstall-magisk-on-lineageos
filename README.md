@@ -24,7 +24,7 @@ If on Windows, you can use the [Windows Subsystem for Linux](https://en.wikipedi
 ## Installation
 
 1. Clone this repo somewhere on your computer (ex: `git clone https://github.com/NicolasWebDev/reinstall-magisk-on-lineageos`)
-2. Edit the script to set both variables at the beginning of the program.
+2. Edit the script to set the `PHONE_ADB_SERIAL_NUMBER` variable at the beginning of the program.
 
 ## Usage
 
