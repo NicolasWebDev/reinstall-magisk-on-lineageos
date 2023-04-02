@@ -136,8 +136,22 @@ reboot_phone() {
     fastboot -s "$PHONE_ADB_SERIAL_NUMBER" reboot
 }
 
-check_magisk_folder() {
-    adb -s "$PHONE_ADB_SERIAL_NUMBER" shell ls /data/adb/magisk/
+check_magisk_app() {
+    magisk_package_name="com.topjohnwu.magisk"
+    magisk_package_name_count=$(adb -s "$PHONE_ADB_SERIAL_NUMBER" shell pm list packages "$magisk_package_name" | wc -l)
+    if [ "${magisk_package_name_count}" -eq 1 ]
+    then
+        print_message " [OK] Magisk app seems to be installed on selected phone"
+    elif [ "${magisk_package_name_count}" -eq 0 ]
+    then
+        print_message " [ERROR] Magisk app seems not installed on selected phone. Exiting."
+        exit -1
+    else
+        print_message " [ERROR] More than one Magisk app entry is present:" 
+        adb -s "$PHONE_ADB_SERIAL_NUMBER" shell pm list packages "$magisk_package_name"
+        print_message "Exiting."
+        exit -1
+    fi
 }
 
 is_rooted_debugging_enabled() {
@@ -149,8 +163,8 @@ main() {
     check_phone_is_connected
     print_message "Checking on phone if rooted debugging is enabled"
     is_rooted_debugging_enabled
-    print_message "Checking on phone if Magisk folder is present listing /data/adb/magisk/"
-    check_magisk_folder
+    print_message "Checking on phone if Magisk is installed"
+    check_magisk_app
     print_message "Downloading build archive from $(get_build_url)"
     download_latest_lineageos_build
     print_message "Extracting 'boot.img' from build archive in /tmp/boot.img"
