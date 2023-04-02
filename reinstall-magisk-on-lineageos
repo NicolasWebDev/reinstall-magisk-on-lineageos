@@ -35,7 +35,8 @@ get_device_downloads_page() {
 }
 
 get_build_url() {
-    curl --no-progress-meter "$(get_device_downloads_page)" | jq -r '.[0].files[0].url'
+    curl --no-progress-meter "$(get_device_downloads_page)" \
+        | jq -r '.[0].files[0].url'
 }
 
 download_latest_lineageos_build() {
@@ -170,6 +171,6 @@ main() {
 }
 
 # Run the main only when this file is executed as script, to help with testing.
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
     main "$@"
 fi
