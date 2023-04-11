@@ -1,6 +1,6 @@
 # Reinstall Magisk on Lineageos
 
-This little bash script is used to reinstall magisk, which gets uninstalled after each LineageOS update.
+Magisk gets uninstalled after each LineageOS update. So this little bash script run from a computer is used to reinstall Magisk on your phone.
 
 Before I had to patch once more the boot using the Magisk app doing all the steps manually, making some mistakes along the way. Now it takes less than 3 minutes to reinstall magisk (virtually all the time is taken by the download), and without any intervention on my part.
 
