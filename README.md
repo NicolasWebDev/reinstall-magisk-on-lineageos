@@ -36,13 +36,7 @@ If on Windows, you can use the [Windows Subsystem for Linux](https://en.wikipedi
 ## How it works
 
 The script should be pretty readable and self-explanatory, without any bash knowledge.
-To sum it up, it downloads the right LineageOS build on your pc (the same one that you have just installed), extracts the `boot.img` image from the archive, transfers it on your phone, uses the Magisk app installed on your phone to patch the `boot.img` image, reboots the phone in fastboot mode, then flashes the patched boot image and restarts the device.
-
-## Different methods of extracting the `boot.img` file
-
-There are 3 different methods to extract the `boot.img` file, depending on your particular device. In this [LineageOS wiki article](https://wiki.lineageos.org/extracting_blobs_from_zips) you can find more details on these methods.
-
-This script currently supports extracting from block-based OTAs and from payload-based OTAs. File-based OTAs are not yet supported.
+To sum it up, it downloads the latest `boot.img` corresponding to your device on your pc, transfers it on your phone, uses the Magisk app installed on your phone to patch the `boot.img` image, reboots the phone in fastboot mode, then flashes the patched boot image and restarts the device.
 
 ## Limitations
 

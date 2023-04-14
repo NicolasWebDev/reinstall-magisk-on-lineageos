@@ -30,71 +30,18 @@ get_device_name() {
     adb -s "$PHONE_ADB_SERIAL_NUMBER" shell getprop ro.lineage.device | tr -d '\n'
 }
 
-get_device_downloads_page() {
+get_device_downloads_json() {
     echo "https://download.lineageos.org/api/v2/devices/$(get_device_name)/builds"
 }
 
-get_build_url() {
-    curl --no-progress-meter "$(get_device_downloads_page)" \
-        | jq -r '.[0].files[0].url'
+get_boot_img_url() {
+    curl --no-progress-meter "$(get_device_downloads_json)" \
+        | jq -r 'max_by(.date) | .files[] | select(.filename == "boot.img") | .url'
 }
 
-download_latest_lineageos_build() {
-    # The --location lets curl follow the redirection.
-    curl --location "$(get_build_url)" --output /tmp/lineageos.zip
-}
-
-extract_boot_image() {
-    # See https://wiki.lineageos.org/extracting_blobs_from_zips to understand the different ways to extract the boot.img file.
-    if is_ota_block_based; then
-        extract_boot_image_from_block_based_ota
-    elif is_ota_payload_based; then
-        extract_boot_image_from_payload_based_ota
-    else
-        extract_boot_image_from_file_based_ota
-    fi
-}
-
-extract_boot_image_from_file_based_ota() {
-    echo 'ERROR: the function "extract_boot_image_from_file_based_ota" is not implemented'
-    exit 1
-}
-
-install_python_protobuf() {
-    sudo python3 -m pip install protobuf
-}
-
-extract_payload_from_payload_based_ota() {
-    unzip -od /tmp /tmp/lineageos.zip payload.bin
-}
-
-generate_random_alnum_string_of_length_6() {
-    tr -dc A-Za-z0-9 </dev/urandom | head -c 6
-}
-
-extract_boot_image_from_payload_file() {
-    install_python_protobuf
-    # For cases in which the repo has already been cloned, I prefer to create a random directory name to clone into, instead of deleting any file or directory on the user's machine.
-    scripts_directory_name="scripts_$(generate_random_alnum_string_of_length_6)"
-    git clone https://github.com/LineageOS/scripts /tmp/$scripts_directory_name
-    python /tmp/$scripts_directory_name/update-payload-extractor/extract.py --partitions boot --output_dir /tmp/ /tmp/payload.bin
-}
-
-extract_boot_image_from_payload_based_ota() {
-    extract_payload_from_payload_based_ota
-    extract_boot_image_from_payload_file
-}
-
-is_ota_payload_based() {
-    unzip -l /tmp/lineageos.zip | grep -wq payload.bin
-}
-
-is_ota_block_based() {
-    unzip -l /tmp/lineageos.zip | grep -wq boot.img
-}
-
-extract_boot_image_from_block_based_ota() {
-    unzip -od /tmp /tmp/lineageos.zip boot.img
+download_boot_img() {
+    # --location tells curl to follow the redirection.
+    curl --location "$(get_boot_img_url)" --output /tmp/boot.img
 }
 
 transfer_unpatched_boot_image_to_phone() {
@@ -147,25 +94,32 @@ is_rooted_debugging_enabled() {
 main() {
     print_message "Looking for phone '$PHONE_ADB_SERIAL_NUMBER'"
     check_phone_is_connected
+
     print_message "Checking on phone if rooted debugging is enabled"
     is_rooted_debugging_enabled
+
     print_message "Checking on phone if Magisk folder is present listing /data/adb/magisk/"
     check_magisk_folder
-    print_message "Downloading build archive from $(get_build_url)"
-    download_latest_lineageos_build
-    print_message "Extracting 'boot.img' from build archive in /tmp/boot.img"
-    extract_boot_image
+
+    print_message "Downloading boot.img from $(get_boot_img_url)"
+    download_boot_img
+
     print_message "Copying from PC to phone the boot image in /sdcard/Download/boot.img"
     transfer_unpatched_boot_image_to_phone
+
     print_message "Patching boot image with Magisk script and moving it in /sdcard/Download/patched-boot.img"
     patch_boot_image_on_phone
+
     print_message "Copying patched boot image from phone to PC in /tmp/patched-boot.img"
     transfer_patched_boot_image_to_pc
+
     print_message "Rebooting phone in fastboot mode"
     reboot_to_bootloader
     wait_for_phone_to_be_in_fastboot
+
     print_message "Flashing patched boot image on phone"
     flash_patched_boot_image
+
     print_message "Rebooting phone"
     reboot_phone
 }
